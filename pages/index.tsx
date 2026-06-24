@@ -9,6 +9,7 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from 'recharts'
+import type { RoasData } from './api/roas'
 
 interface Metrics {
   mrr: number
@@ -35,6 +36,10 @@ function fmt(n: number, currency = true) {
   if (currency)
     return `$${n.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`
   return n.toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1 })
+}
+
+function fmtRoas(n: number) {
+  return `${n.toFixed(2)}x`
 }
 
 function MetricCard({
@@ -106,14 +111,16 @@ function MrrChart({ data }: { data: MrrPoint[] }) {
 export default function Dashboard() {
   const [metrics, setMetrics] = useState<Metrics | null>(null)
   const [mrrHistory, setMrrHistory] = useState<MrrPoint[]>([])
+  const [roas, setRoas] = useState<RoasData | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
   const load = async () => {
     try {
-      const [metricsRes, historyRes] = await Promise.allSettled([
+      const [metricsRes, historyRes, roasRes] = await Promise.allSettled([
         fetch('/api/metrics').then((r) => r.json()),
         fetch('/api/mrr-history').then((r) => r.json()),
+        fetch('/api/roas').then((r) => r.json()),
       ])
 
       if (metricsRes.status === 'fulfilled') {
@@ -125,6 +132,10 @@ export default function Dashboard() {
 
       if (historyRes.status === 'fulfilled' && Array.isArray(historyRes.value)) {
         setMrrHistory(historyRes.value as MrrPoint[])
+      }
+
+      if (roasRes.status === 'fulfilled') {
+        setRoas(roasRes.value as RoasData)
       }
     } catch (e) {
       setError((e as Error).message)
@@ -239,6 +250,34 @@ export default function Dashboard() {
                   MRR — 7-day trend
                 </p>
                 <MrrChart data={mrrHistory} />
+              </div>
+            )}
+
+            {roas?.available && (
+              <div className="rounded-xl bg-zinc-900 border border-zinc-800 p-5 mb-6">
+                <p className="text-xs text-zinc-500 uppercase tracking-widest mb-4">
+                  Ad spend &amp; ROAS — last 7 days
+                </p>
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                  <MetricCard
+                    label="Total ROAS"
+                    value={fmtRoas(roas.total_roas)}
+                    sub={`$${roas.total_spend.toFixed(0)} spend · $${roas.total_revenue.toFixed(0)} revenue`}
+                    highlight={roas.total_roas >= 2}
+                  />
+                  <MetricCard
+                    label="Google ROAS"
+                    value={fmtRoas(roas.google_roas)}
+                    sub={`$${roas.google_spend.toFixed(0)} spend`}
+                    highlight={roas.google_roas >= 2}
+                  />
+                  <MetricCard
+                    label="Meta ROAS"
+                    value={fmtRoas(roas.meta_roas)}
+                    sub={`$${roas.meta_spend.toFixed(0)} spend`}
+                    highlight={roas.meta_roas >= 2}
+                  />
+                </div>
               </div>
             )}
 
