@@ -1,0 +1,25 @@
+name: Notify Dispatch
+on:
+  push:
+    branches: [main]
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Emit push event to garcar-dispatch
+        env:
+          DISPATCH_URL: ${{ secrets.DISPATCH_URL }}
+          DISPATCH_SECRET: ${{ secrets.DISPATCH_SECRET }}
+        run: |
+          if [ -z "$DISPATCH_URL" ]; then
+            echo "DISPATCH_URL not set — skipping"
+            exit 0
+          fi
+          BODY=$(printf '{"event_type":"github.push","source_system":"github-actions","payload":{"repo":"%s","sha":"%s","actor":"%s","ref":"%s"}}' \
+            "${{ github.repository }}" "${{ github.sha }}" "${{ github.actor }}" "${{ github.ref }}")
+          SIG=$(printf '%s' "$BODY" | openssl dgst -sha256 -hmac "${DISPATCH_SECRET:-placeholder}" -hex | awk '{print $2}')
+          curl -sf -X POST "$DISPATCH_URL/dispatch" \
+            -H "Content-Type: application/json" \
+            -H "X-Dispatch-Sig: $SIG" \
+            -d "$BODY" || echo "Dispatch notify skipped"
