@@ -1,15 +1,5 @@
 import { useEffect, useState } from 'react'
 import Head from 'next/head'
-import {
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-} from 'recharts'
-import type { RoasData } from './api/roas'
 
 interface Metrics {
   mrr: number
@@ -27,116 +17,74 @@ interface Metrics {
   updated_at: string
 }
 
-interface MrrPoint {
-  date: string
-  mrr: number
+interface DispatchEvent {
+  id: string
+  event_type: string
+  source_system: string
+  trace_id: string | null
+  status: string
+  created_at: string
 }
 
 function fmt(n: number, currency = true) {
-  if (currency)
-    return `$${n.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`
+  if (currency) return `$${n.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`
   return n.toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1 })
 }
 
-function fmtRoas(n: number) {
-  return `${n.toFixed(2)}x`
-}
-
-function MetricCard({
-  label,
-  value,
-  sub,
-  highlight = false,
-}: {
-  label: string
-  value: string
-  sub?: string
-  highlight?: boolean
+function MetricCard({ label, value, sub, highlight = false }: {
+  label: string; value: string; sub?: string; highlight?: boolean
 }) {
   return (
-    <div
-      className={`rounded-xl p-5 border ${
-        highlight ? 'bg-emerald-950/40 border-emerald-800' : 'bg-zinc-900 border-zinc-800'
-      }`}
-    >
+    <div className={`rounded-xl p-5 border ${
+      highlight ? 'bg-emerald-950/40 border-emerald-800' : 'bg-zinc-900 border-zinc-800'
+    }`}>
       <p className="text-xs text-zinc-500 uppercase tracking-widest mb-1">{label}</p>
-      <p className={`text-3xl font-bold ${highlight ? 'text-emerald-400' : 'text-white'}`}>
-        {value}
-      </p>
+      <p className={`text-3xl font-bold ${highlight ? 'text-emerald-400' : 'text-white'}`}>{value}</p>
       {sub && <p className="text-xs text-zinc-500 mt-1">{sub}</p>}
     </div>
   )
 }
 
-function MrrChart({ data }: { data: MrrPoint[] }) {
+const SOURCE_COLORS: Record<string, string> = {
+  'garcar-payment-loop': 'text-emerald-400',
+  'garcar-payments':     'text-blue-400',
+  'github-actions':      'text-purple-400',
+  'garcar-rhns-core':    'text-orange-400',
+  'garcar-control-plane':'text-cyan-400',
+}
+
+const STATUS_DOT: Record<string, string> = {
+  processed: 'bg-emerald-500',
+  failed:    'bg-red-500',
+  pending:   'bg-yellow-500 animate-pulse',
+}
+
+function EventRow({ event }: { event: DispatchEvent }) {
+  const color  = SOURCE_COLORS[event.source_system] ?? 'text-zinc-400'
+  const dot    = STATUS_DOT[event.status] ?? 'bg-zinc-600'
+  const time   = new Date(event.created_at).toLocaleTimeString()
   return (
-    <ResponsiveContainer width="100%" height={200}>
-      <LineChart data={data} margin={{ top: 5, right: 10, left: 10, bottom: 5 }}>
-        <CartesianGrid strokeDasharray="3 3" stroke="#27272a" />
-        <XAxis
-          dataKey="date"
-          tick={{ fill: '#71717a', fontSize: 11 }}
-          tickFormatter={(d: string) => d.slice(5)}
-        />
-        <YAxis
-          tick={{ fill: '#71717a', fontSize: 11 }}
-          tickFormatter={(v: number) => `$${(v / 1000).toFixed(0)}k`}
-          width={44}
-        />
-        <Tooltip
-          contentStyle={{
-            background: '#18181b',
-            border: '1px solid #3f3f46',
-            borderRadius: 8,
-          }}
-          labelStyle={{ color: '#a1a1aa' }}
-          formatter={(value) => {
-            const n = Number(value)
-            return [`$${n.toLocaleString('en-US')}`, 'MRR']
-          }}
-        />
-        <Line
-          type="monotone"
-          dataKey="mrr"
-          stroke="#34d399"
-          strokeWidth={2}
-          dot={{ fill: '#34d399', r: 3 }}
-          activeDot={{ r: 5 }}
-        />
-      </LineChart>
-    </ResponsiveContainer>
+    <div className="flex items-center gap-3 py-2 border-b border-zinc-800/50 last:border-0 text-sm">
+      <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${dot}`} />
+      <span className={`font-mono text-xs ${color} w-40 flex-shrink-0 truncate`}>{event.source_system}</span>
+      <span className="text-zinc-300 flex-1 truncate">{event.event_type}</span>
+      <span className="text-zinc-600 text-xs flex-shrink-0">{time}</span>
+    </div>
   )
 }
 
 export default function Dashboard() {
   const [metrics, setMetrics] = useState<Metrics | null>(null)
-  const [mrrHistory, setMrrHistory] = useState<MrrPoint[]>([])
-  const [roas, setRoas] = useState<RoasData | null>(null)
+  const [events,  setEvents]  = useState<DispatchEvent[]>([])
   const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+  const [error,   setError]   = useState<string | null>(null)
 
-  const load = async () => {
+  const loadMetrics = async () => {
     try {
-      const [metricsRes, historyRes, roasRes] = await Promise.allSettled([
-        fetch('/api/metrics').then((r) => r.json()),
-        fetch('/api/mrr-history').then((r) => r.json()),
-        fetch('/api/roas').then((r) => r.json()),
-      ])
-
-      if (metricsRes.status === 'fulfilled') {
-        setMetrics(metricsRes.value as Metrics)
-        setError(null)
-      } else {
-        setError('Failed to load metrics')
-      }
-
-      if (historyRes.status === 'fulfilled' && Array.isArray(historyRes.value)) {
-        setMrrHistory(historyRes.value as MrrPoint[])
-      }
-
-      if (roasRes.status === 'fulfilled') {
-        setRoas(roasRes.value as RoasData)
-      }
+      const res = await fetch('/api/metrics')
+      if (!res.ok) throw new Error(`HTTP ${res.status}`)
+      setMetrics(await res.json())
+      setError(null)
     } catch (e) {
       setError((e as Error).message)
     } finally {
@@ -144,11 +92,21 @@ export default function Dashboard() {
     }
   }
 
+  const loadEvents = async () => {
+    try {
+      const res = await fetch('/api/events?limit=15')
+      if (!res.ok) return
+      const data = await res.json()
+      setEvents(data.events ?? [])
+    } catch { /* non-fatal */ }
+  }
+
   useEffect(() => {
-    load()
-    const interval = setInterval(load, 30_000)
-    return () => clearInterval(interval)
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    loadMetrics()
+    loadEvents()
+    const t1 = setInterval(loadMetrics, 30_000)
+    const t2 = setInterval(loadEvents, 10_000)
+    return () => { clearInterval(t1); clearInterval(t2) }
   }, [])
 
   const updatedAt = metrics ? new Date(metrics.updated_at).toLocaleTimeString() : '—'
@@ -164,18 +122,12 @@ export default function Dashboard() {
         <div className="flex items-center justify-between mb-8">
           <div>
             <h1 className="text-2xl font-bold text-white">Zeus Revenue Dashboard</h1>
-            <p className="text-xs text-zinc-500 mt-0.5">
-              Garcar Enterprise · Live · refreshes every 30s
-            </p>
+            <p className="text-xs text-zinc-500 mt-0.5">Garcar Enterprise · Live · refreshes every 30s</p>
           </div>
           <div className="flex items-center gap-2">
-            <span
-              className={`w-2 h-2 rounded-full ${
-                metrics?.engine_status === 'OPERATIONAL'
-                  ? 'bg-emerald-400 animate-pulse'
-                  : 'bg-red-500'
-              }`}
-            />
+            <span className={`w-2 h-2 rounded-full ${
+              metrics?.engine_status === 'OPERATIONAL' ? 'bg-emerald-400 animate-pulse' : 'bg-red-500'
+            }`} />
             <span className="text-xs text-zinc-400">{metrics?.engine_status ?? '…'}</span>
             <span className="text-xs text-zinc-600 ml-2">Updated {updatedAt}</span>
           </div>
@@ -201,9 +153,7 @@ export default function Dashboard() {
               <MetricCard
                 label="MRR"
                 value={fmt(metrics?.mrr ?? 0)}
-                sub={`${fmt(metrics?.mrr_pct ?? 0, false)}% of $${(
-                  (metrics?.mrr_target ?? 40_000) / 1000
-                ).toFixed(0)}k target`}
+                sub={`${fmt(metrics?.mrr_pct ?? 0, false)}% of $${((metrics?.mrr_target ?? 40000) / 1000).toFixed(0)}k target`}
                 highlight={(metrics?.mrr ?? 0) > 0}
               />
               <MetricCard
@@ -214,9 +164,7 @@ export default function Dashboard() {
               <MetricCard
                 label="SGR"
                 value={fmt(metrics?.sgr ?? 0, false)}
-                sub={`threshold 0.85 — ${
-                  (metrics?.sgr ?? 0) >= 0.85 ? '✅ pass' : '❌ fail'
-                }`}
+                sub={`threshold 0.85 — ${(metrics?.sgr ?? 0) >= 0.85 ? '✅ pass' : '❌ fail'}`}
                 highlight={(metrics?.sgr ?? 0) >= 0.85}
               />
               <MetricCard
@@ -227,63 +175,30 @@ export default function Dashboard() {
             </div>
 
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-6">
-              <MetricCard
-                label="Daily signups"
-                value={String(metrics?.daily_signups ?? 0)}
-                sub="target: 5–10/day"
-              />
-              <MetricCard
-                label="Churn rate"
-                value={`${fmt(metrics?.churn_rate ?? 0, false)}%`}
-                sub="monthly"
-              />
-              <MetricCard
-                label="CAC"
-                value={fmt(metrics?.cac ?? 0)}
-                sub="customer acquisition cost"
-              />
+              <MetricCard label="Daily signups"  value={String(metrics?.daily_signups ?? 0)} sub="target: 5–10/day" />
+              <MetricCard label="Churn rate"      value={`${fmt(metrics?.churn_rate ?? 0, false)}%`} sub="monthly" />
+              <MetricCard label="CAC"             value={fmt(metrics?.cac ?? 0)} sub="customer acquisition cost" />
             </div>
 
-            {mrrHistory.length > 0 && (
-              <div className="rounded-xl bg-zinc-900 border border-zinc-800 p-5 mb-6">
-                <p className="text-xs text-zinc-500 uppercase tracking-widest mb-4">
-                  MRR — 7-day trend
-                </p>
-                <MrrChart data={mrrHistory} />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="rounded-xl bg-zinc-900 border border-zinc-800 p-5">
+                <p className="text-xs text-zinc-500 uppercase tracking-widest mb-2">Top priority</p>
+                <p className="text-sm text-zinc-200">{metrics?.top_priority ?? '—'}</p>
               </div>
-            )}
 
-            {roas?.available && (
-              <div className="rounded-xl bg-zinc-900 border border-zinc-800 p-5 mb-6">
-                <p className="text-xs text-zinc-500 uppercase tracking-widest mb-4">
-                  Ad spend &amp; ROAS — last 7 days
-                </p>
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                  <MetricCard
-                    label="Total ROAS"
-                    value={fmtRoas(roas.total_roas)}
-                    sub={`$${roas.total_spend.toFixed(0)} spend · $${roas.total_revenue.toFixed(0)} revenue`}
-                    highlight={roas.total_roas >= 2}
-                  />
-                  <MetricCard
-                    label="Google ROAS"
-                    value={fmtRoas(roas.google_roas)}
-                    sub={`$${roas.google_spend.toFixed(0)} spend`}
-                    highlight={roas.google_roas >= 2}
-                  />
-                  <MetricCard
-                    label="Meta ROAS"
-                    value={fmtRoas(roas.meta_roas)}
-                    sub={`$${roas.meta_spend.toFixed(0)} spend`}
-                    highlight={roas.meta_roas >= 2}
-                  />
+              <div className="rounded-xl bg-zinc-900 border border-zinc-800 p-5">
+                <div className="flex items-center justify-between mb-3">
+                  <p className="text-xs text-zinc-500 uppercase tracking-widest">Event bus · live</p>
+                  <span className="text-xs text-zinc-600">{events.length} recent</span>
                 </div>
+                {events.length === 0 ? (
+                  <p className="text-xs text-zinc-600">No events yet — waiting for first dispatch</p>
+                ) : (
+                  <div className="max-h-48 overflow-y-auto">
+                    {events.map(e => <EventRow key={e.id} event={e} />)}
+                  </div>
+                )}
               </div>
-            )}
-
-            <div className="rounded-xl bg-zinc-900 border border-zinc-800 p-5">
-              <p className="text-xs text-zinc-500 uppercase tracking-widest mb-2">Top priority</p>
-              <p className="text-sm text-zinc-200">{metrics?.top_priority ?? '—'}</p>
             </div>
           </>
         )}
