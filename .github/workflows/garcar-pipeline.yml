@@ -1,0 +1,35 @@
+# .github/workflows/garcar-pipeline.yml
+# zeus-dashboard — ATLAS validation + notify (runs alongside Vercel deploy.yml)
+name: Garcar Pipeline
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: Target environment
+        default: production
+        type: choice
+        options: [production, staging, preview]
+
+jobs:
+  pipeline:
+    uses: Garrettc123/garcar-control-plane/.github/workflows/garcar-deploy.yml@main
+    with:
+      service_name: zeus-dashboard
+      environment: ${{ github.event.inputs.environment || 'production' }}
+      railway_service_id: ""
+      deploy_edge_function: ""
+      run_schema_migration: false
+      notify_atlas: true
+    secrets:
+      RAILWAY_TOKEN:         ${{ secrets.RAILWAY_TOKEN }}
+      SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+      SUPABASE_PROJECT_ID:   ${{ secrets.SUPABASE_PROJECT_ID }}
+      SUPABASE_DB_URL:       ${{ secrets.SUPABASE_DB_URL }}
+      ATLAS_INGEST_URL:      ${{ secrets.ATLAS_INGEST_URL }}
+      ATLAS_API_KEY:         ${{ secrets.ATLAS_API_KEY }}
+      ECR_REGISTRY:          ${{ secrets.ECR_REGISTRY }}
+      AWS_ACCESS_KEY_ID:     ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_REGION:            ${{ secrets.AWS_REGION }}
