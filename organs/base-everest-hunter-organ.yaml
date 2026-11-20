@@ -3,7 +3,7 @@
 organ:
   name: base-everest-hunter
   family: Research
-  version: 0.2.0
+  version: 0.3.0
   purpose: "Evidence-backed review of eligible Base Everest competition code; no out-of-scope or public network testing."
 
 scope:
@@ -44,6 +44,19 @@ verification:
   finding_verified: false
   submissions_sent: 0
   verified_bounty_earnings_usd: 0
+
+hosting:
+  architecture: garcar-burst-host-mesh
+  manifest: https://github.com/Garrettc123/ai-swarm-crypto-bounty-system/blob/main/hosting/burst_host_mesh.json
+  verification_workflow: https://github.com/Garrettc123/ai-swarm-crypto-bounty-system/actions/runs/44683132434
+  github_actions_ephemeral_source_review: verified
+  github_actions_docker_daemon: verified_available
+  railway_bounty_staging_health: verified
+  railway_healthcheck_mode: read_only_https_get
+  full_everest_devnet_host: not_connected
+  dedicated_host_auto_provision: false
+  local_devnet_auto_start: false
+  production_promotion: prohibited_without_review
 
 next:
   - Revalidate current scope and published known issues before any candidate submission
