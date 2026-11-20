@@ -1,0 +1,17 @@
+# BioForge Research Organ — Base Everest Immunefi Hunter
+# Proof status: zeus.py unavailable; local proof_hash pending host run
+
+organ:
+  name: base-everest-hunter
+  family: Research
+  version: 0.1.0
+  purpose: "Prioritize, scan, and draft runnable local-devnet PoCs for eligible Critical/High impacts in the Base Everest Immunefi Audit Competition without matching published KI exclusions exactly."
+
+priority_vectors:
+  - Proof soundness / invalid output roots reaching AggregateVerifier or finalizing despite Guardian
+  - Derivation/finalization stalls stopping user-tx inclusion >=30s
+  - Base Transaction (EIP-8430) / validity-tx escalations beyond KI residuals
+  - CL/EL divergence or hardfork edges
+  - B20 Critical impacts
+
+next: host-run zeus.py run-once then embed proof_hash
