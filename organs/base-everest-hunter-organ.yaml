@@ -3,7 +3,7 @@
 organ:
   name: base-everest-hunter
   family: Research
-  version: 0.6.0
+  version: 0.7.0
   purpose: "Evidence-backed review of eligible Base Everest competition code; no out-of-scope or public network testing."
 
 scope:
@@ -103,6 +103,34 @@ source_intelligence:
   po_cs_reproduced: 0
   submissions_sent: 0
   earnings_usd: 0
+
+
+rust_oracle:
+  status: executed_original_pinned_rust_tests
+  original_source_path: crates/consensus/protocol/src/batch/validity.rs
+  immutable_git_blob_sha1: dbc88782419cb9ee46ea29cfe2e18873352fd494
+  pinned_commit: 689054ee14933cb2ee5bd54eadcd8dacbe1cc517
+  runner: https://github.com/Garrettc123/ai-swarm-crypto-bounty-system/blob/main/crypto/rust_oracle.py
+  verifier: https://github.com/Garrettc123/ai-swarm-crypto-bounty-system/blob/main/crypto/verify_rust_oracle.py
+  runbook: https://github.com/Garrettc123/ai-swarm-crypto-bounty-system/blob/main/crypto/RUST_ORACLE.md
+  verified_main_workflow: https://github.com/Garrettc123/ai-swarm-crypto-bounty-system/actions/runs/44720627431
+  original_upstream_tests_passed: 3
+  separately_authored_zeus_invariants_passed: 2
+  safety_and_receipt_unit_tests_passed: 16
+  compiler: rustc_1.100.0
+  result: five_pinned_rust_tests_passed
+  unsigned_metadata_receipt_sha256: 7148357b05b6d6ab6cc922d5449a11503a424037b0f09b88c9c2010a25dc1c4b
+  independent_receipt_verdict: receipt_consistent_not_execution_attested
+  rust_workspace_built: false
+  measured_coverage: null
+  full_local_devnet_executed: false
+  vulnerability_found: false
+  proof_hash: null
+  accepted_reports: 0
+  verified_bounty_earnings_usd: 0
+  automatic_submissions: false
+  outbound_network_isolation_enforced: false
+  competition_window_schedule_only: true
 
 next:
   - Revalidate current scope and published known issues before any candidate submission
