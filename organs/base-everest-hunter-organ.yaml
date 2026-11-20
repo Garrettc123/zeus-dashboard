@@ -3,7 +3,7 @@
 organ:
   name: base-everest-hunter
   family: Research
-  version: 0.4.0
+  version: 0.5.0
   purpose: "Evidence-backed review of eligible Base Everest competition code; no out-of-scope or public network testing."
 
 scope:
@@ -65,6 +65,26 @@ hosting:
   dedicated_host_auto_provision: false
   local_devnet_auto_start: false
   production_promotion: prohibited_without_review
+
+
+autohunt:
+  status: running_automated_passive_review
+  policy: https://github.com/Garrettc123/ai-swarm-crypto-bounty-system/blob/main/crypto/autohunt_policy.json
+  runner: https://github.com/Garrettc123/ai-swarm-crypto-bounty-system/blob/main/crypto/autohunt.py
+  guide: https://github.com/Garrettc123/ai-swarm-crypto-bounty-system/blob/main/crypto/AUTOHUNT.md
+  deployed_commit: cf28b5423a34c59bd482dd254cccb38b7ab86848
+  verified_main_workflow: https://github.com/Garrettc123/ai-swarm-crypto-bounty-system/actions/runs/44693544620
+  schedule: daily_1417_utc
+  verified_discovery_listings: 246
+  review_questions_queued: 5
+  questions_are_vulnerabilities: false
+  signed_execution_receipts: false
+  static_integrity_receipt_sha256: 76880057717d7ba9c714af59f8a270764dcb052f9c4368d6c664fb75b3a6a1aa
+  known_issues_and_scope_review: manual_pending
+  expires_on_competition_close: true
+  auto_exploits: false
+  auto_reports: false
+  payouts_verified_usd: 0
 
 next:
   - Revalidate current scope and published known issues before any candidate submission
