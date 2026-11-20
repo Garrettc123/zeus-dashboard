@@ -3,7 +3,7 @@
 organ:
   name: base-everest-hunter
   family: Research
-  version: 0.3.0
+  version: 0.4.0
   purpose: "Evidence-backed review of eligible Base Everest competition code; no out-of-scope or public network testing."
 
 scope:
@@ -46,9 +46,17 @@ verification:
   verified_bounty_earnings_usd: 0
 
 hosting:
-  architecture: garcar-burst-host-mesh
+  architecture: garcar-burst-host-mesh-v2
   manifest: https://github.com/Garrettc123/ai-swarm-crypto-bounty-system/blob/main/hosting/burst_host_mesh.json
-  verification_workflow: https://github.com/Garrettc123/ai-swarm-crypto-bounty-system/actions/runs/44683132434
+  verification_workflow: https://github.com/Garrettc123/ai-swarm-crypto-bounty-system/actions/runs/44686760839
+  dispatch_policy: https://github.com/Garrettc123/ai-swarm-crypto-bounty-system/blob/main/hosting/dispatch_policy.json
+  dispatch_router: https://github.com/Garrettc123/ai-swarm-crypto-bounty-system/blob/main/hosting/mesh_dispatch.py
+  receipt_verifier: https://github.com/Garrettc123/ai-swarm-crypto-bounty-system/blob/main/hosting/verify_receipt.py
+  host_capacity_gate: https://github.com/Garrettc123/ai-swarm-crypto-bounty-system/blob/main/hosting/host_capacity.py
+  private_host_readiness_pr: https://github.com/Garrettc123/garcar-private-control-os/pull/2
+  latest_route_receipt_sha256: 11b286c5d30423655247d4ab7603632cffabcf40872e10931b0f56bef554792c
+  github_host_devnet_capacity: insufficient_or_unverified
+  private_isolated_runner: not_connected
   github_actions_ephemeral_source_review: verified
   github_actions_docker_daemon: verified_available
   railway_bounty_staging_health: verified
