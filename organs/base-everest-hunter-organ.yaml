@@ -3,7 +3,7 @@
 organ:
   name: base-everest-hunter
   family: Research
-  version: 0.5.0
+  version: 0.6.0
   purpose: "Evidence-backed review of eligible Base Everest competition code; no out-of-scope or public network testing."
 
 scope:
@@ -72,19 +72,37 @@ autohunt:
   policy: https://github.com/Garrettc123/ai-swarm-crypto-bounty-system/blob/main/crypto/autohunt_policy.json
   runner: https://github.com/Garrettc123/ai-swarm-crypto-bounty-system/blob/main/crypto/autohunt.py
   guide: https://github.com/Garrettc123/ai-swarm-crypto-bounty-system/blob/main/crypto/AUTOHUNT.md
-  deployed_commit: cf28b5423a34c59bd482dd254cccb38b7ab86848
-  verified_main_workflow: https://github.com/Garrettc123/ai-swarm-crypto-bounty-system/actions/runs/44693544620
+  deployed_commit: 9589b0a459dfeac09ca806f4142a0e1fb8fcbfbf
+  verified_main_workflow: https://github.com/Garrettc123/ai-swarm-crypto-bounty-system/actions/runs/44696020764
   schedule: daily_1417_utc
   verified_discovery_listings: 246
   review_questions_queued: 5
   questions_are_vulnerabilities: false
   signed_execution_receipts: false
-  static_integrity_receipt_sha256: 76880057717d7ba9c714af59f8a270764dcb052f9c4368d6c664fb75b3a6a1aa
+  static_integrity_receipt_sha256: a1b4bd7c95ce8daa388d8249936a5ea0551618d6a9641e186b025ee3e8c67938
   known_issues_and_scope_review: manual_pending
   expires_on_competition_close: true
   auto_exploits: false
   auto_reports: false
   payouts_verified_usd: 0
+
+
+source_intelligence:
+  status: authenticated_static_evidence_mapping_live
+  runner: https://github.com/Garrettc123/ai-swarm-crypto-bounty-system/blob/main/crypto/evidence_mapper.py
+  operating_guide: https://github.com/Garrettc123/ai-swarm-crypto-bounty-system/blob/main/crypto/EVIDENCE_MAPPER.md
+  verified_main_workflow: https://github.com/Garrettc123/ai-swarm-crypto-bounty-system/actions/runs/44696020764
+  source_code_files_pinned_and_verified: 5
+  adjacent_rust_test_files_pinned_and_verified: 2
+  source_review_backlog_questions: 5
+  provenance_receipt_sha256: d6b8aab7f7821b1abbd2e202e6698c467c2ce7610d62ef887285a698a548be08
+  analysis_method: textual_function_and_test_reference_inventory_not_complete_rust_parser
+  rust_tests_executed: false
+  measured_test_coverage_verified: false
+  vulnerabilities_confirmed: 0
+  po_cs_reproduced: 0
+  submissions_sent: 0
+  earnings_usd: 0
 
 next:
   - Revalidate current scope and published known issues before any candidate submission
