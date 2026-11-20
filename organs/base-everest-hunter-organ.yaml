@@ -1,11 +1,33 @@
 # BioForge Research Organ — Base Everest Immunefi Hunter
-# Proof status: zeus.py unavailable; local proof_hash pending host run
-
+# Research intake and pinned-source review verified. No vulnerability PoC exists.
 organ:
   name: base-everest-hunter
   family: Research
-  version: 0.1.0
-  purpose: "Prioritize, scan, and draft runnable local-devnet PoCs for eligible Critical/High impacts in the Base Everest Immunefi Audit Competition without matching published KI exclusions exactly."
+  version: 0.2.0
+  purpose: "Evidence-backed review of eligible Base Everest competition code; no out-of-scope or public network testing."
+
+scope:
+  competition: https://immunefi.com/audit-competition/audit-comp-base-everest/information/
+  scope_rules: https://immunefi.com/audit-competition/audit-comp-base-everest/scope/
+  resources: https://immunefi.com/audit-competition/audit-comp-base-everest/resources/
+  offchain_source: immunefi-team/audit-comp-base-everest-base
+  offchain_pinned_commit: 689054ee14933cb2ee5bd54eadcd8dacbe1cc517
+  testing_environment: local_everest_devnet_only
+  public_network_testing: prohibited
+  runnable_poc_required: true
+  public_disclosure_without_authorization: prohibited
+
+runtime:
+  source_repo: Garrettc123/ai-swarm-crypto-bounty-system
+  source_runner: zeus.py
+  command: 'python zeus.py run-once --intent "Base Everest bounty hunt organ" --estimated-value-usd 250000'
+  method: pinned_source_review_only
+  latest_verified_workflow: https://github.com/Garrettc123/ai-swarm-crypto-bounty-system/actions/runs/44675836979
+  research_source_evidence_sha256: bd29c026aeb9701a4a71db0026158bafe09a2aef77ca5d02ea5926f4113cc2fe
+  source_files_verified: 5
+  source_review_status: completed
+  proof_cycle_status: not_executed
+  devnet_status: not_executed
 
 priority_vectors:
   - Proof soundness / invalid output roots reaching AggregateVerifier or finalizing despite Guardian
@@ -14,4 +36,17 @@ priority_vectors:
   - CL/EL divergence or hardfork edges
   - B20 Critical impacts
 
-next: host-run zeus.py run-once then embed proof_hash
+verification:
+  proof_hash: null
+  srr_hash: null
+  seal_hash: null
+  axiom_12_score: null
+  finding_verified: false
+  submissions_sent: 0
+  verified_bounty_earnings_usd: 0
+
+next:
+  - Revalidate current scope and published known issues before any candidate submission
+  - Bring up pinned Production-config Everest devnet on an authorized capable Linux host
+  - Execute a real in-scope code-path PoC if review identifies a plausible defect
+  - Capture and verify PoC evidence before scoring AXIOM-12
