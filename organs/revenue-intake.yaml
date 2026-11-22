@@ -1,0 +1,61 @@
+id: revenue-intake
+family: Revenue
+version: 0.1.0
+display_name: Revenue Intake
+purpose: Snap-on organ that captures and gates leads into the BioForge Revenue spine with RHNS verification.
+
+ports:
+  requires:
+    - core.identity
+    - core.events
+    - core.audit
+    - rhns.cmc
+  provides:
+    - revenue.intake
+
+events:
+  in:
+    - name: lead.captured
+      schema: LeadCaptured
+  out:
+    - name: lead.gated
+      schema: LeadGated
+
+policy:
+  scope:
+    - leads.read
+    - leads.write
+  forbidden:
+    - billing.charge
+
+rhns:
+  planner: rgt+hrm
+  gate: cmc
+  commit_required_for:
+    - lead.accept
+  memory: federated-kg
+  audit: ledger
+
+detach:
+  order:
+    - deactivate subscriptions
+    - freeze writes
+    - export owned schema
+    - drop routes
+  retains:
+    - audit ledger rows
+  rollback: restore last certified schema version
+
+pricing:
+  sku: LLA-47
+  pack: Revenue
+  model: snap-module
+  interval: one-time
+
+skeleton_hops:
+  - intake
+  - enrichment
+
+notes: |
+  proof_hash: 2398aa32e69202313aeccadacb6638f32eb7e9df5697ad93f080a4fcc05a3060
+  Full Revenue spine start. MCP write in Sovereign One cycle.
