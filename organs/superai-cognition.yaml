@@ -1,0 +1,65 @@
+id: superai-cognition
+family: Enterprise Intelligence
+version: 0.1.0
+display_name: SuperAI Cognition
+purpose: Snap-on organ that forges governed super-reasoning loops under RHNS for proof-linked autonomous decisions.
+
+ports:
+  requires:
+    - core.identity
+    - core.events
+    - core.audit
+    - rhns.cmc
+  provides:
+    - ei.reasoning
+    - ei.decision
+
+events:
+  in:
+    - name: intent.received
+      schema: IntentReceived
+  out:
+    - name: decision.proven
+      schema: DecisionProven
+
+policy:
+  scope:
+    - decisions.read
+    - decisions.write
+  forbidden:
+    - billing.charge
+    - secrets.exfiltrate
+
+rhns:
+  planner: rgt+hrm
+  gate: cmc
+  commit_required_for:
+    - decision.commit
+  memory: federated-kg
+  audit: ledger
+
+detach:
+  order:
+    - deactivate subscriptions
+    - freeze writes
+    - export owned schema
+    - drop routes
+  retains:
+    - audit ledger rows
+  rollback: restore last certified schema version
+
+pricing:
+  sku: AI-AUDIT-299
+  pack: Enterprise Intelligence
+  model: snap-module
+  interval: one-time
+
+skeleton_hops:
+  - research
+  - governance
+
+notes: |
+  proof_hash: 2398aa32e69202313aeccadacb6638f32eb7e9df5697ad93f080a4fcc05a3060
+  srr_hash: e521977e3faaa9400e65f0f73db4b55f4e01345865cd444d150b56f78bb1f561
+  created via MCP/GitHub connector in Sovereign One cycle for Super AI intent.
+  Runtime: zeus.py unavailable this session. Baseline hashes used.
