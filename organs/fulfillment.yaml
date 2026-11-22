@@ -1,0 +1,60 @@
+id: fulfillment
+family: Fulfillment
+version: 0.1.0
+display_name: Fulfillment
+purpose: Snap-on organ that triggers same-day fulfillment after Stripe paid=true (last4 != 4242) with proof_hash handoff.
+
+ports:
+  requires:
+    - core.identity
+    - core.events
+    - core.audit
+    - rhns.cmc
+  provides:
+    - fulfillment.trigger
+
+events:
+  in:
+    - name: payment.confirmed
+      schema: PaymentConfirmed
+  out:
+    - name: fulfillment.started
+      schema: FulfillmentStarted
+
+policy:
+  scope:
+    - fulfillment.read
+    - fulfillment.write
+  forbidden:
+    - billing.charge
+
+rhns:
+  planner: rgt+hrm
+  gate: cmc
+  commit_required_for:
+    - fulfillment.trigger
+  memory: federated-kg
+  audit: ledger
+
+detach:
+  order:
+    - deactivate subscriptions
+    - freeze writes
+    - export owned schema
+    - drop routes
+  retains:
+    - audit ledger rows
+  rollback: restore last certified schema version
+
+pricing:
+  sku: AI-AUDIT-299
+  pack: Fulfillment
+  model: snap-module
+  interval: one-time
+
+skeleton_hops:
+  - fulfillment
+
+notes: |
+  proof_hash: 2398aa32e69202313aeccadacb6638f32eb7e9df5697ad93f080a4fcc05a3060
+  Cash is Stripe paid=true only. MCP write in full build-out.
